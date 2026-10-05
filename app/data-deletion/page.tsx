@@ -11,8 +11,8 @@ export default function DataDeletionPage() {
   return (
     <LegalShell
       title="Data Deletion"
-      description="Use this page for Meta App Review and customer requests about removing OpenReply account, workspace, Instagram, and campaign data."
-      updatedAt="May 24, 2026"
+      description="How to request removal of data held by RL Enterprises (RL Jewels) through this Instagram comment-to-DM service."
+      updatedAt="October 5, 2026"
     >
       <section>
         <h2 className="text-xl font-bold text-white">Disconnect Instagram</h2>
@@ -26,10 +26,22 @@ export default function DataDeletionPage() {
       <section>
         <h2 className="text-xl font-bold text-white">Delete Workspace Data</h2>
         <p className="mt-3">
-          To delete workspace, campaign, log, webhook, billing reference, and
-          operational diagnostic data, contact support from the email address
-          used to sign in. Include the workspace name and the Instagram username
+          To delete workspace, campaign, log, webhook, and operational
+          diagnostic data, email contact@rljewels.com from the address used to
+          sign in. Include the workspace name and the Instagram username
           connected to the workspace.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-white">
+          If You Commented On Our Instagram Posts
+        </h2>
+        <p className="mt-3">
+          If you commented on one of our posts and want data linked to your
+          Instagram account removed from our logs, email contact@rljewels.com
+          with your Instagram username. We will locate and delete the related
+          records.
         </p>
       </section>
 

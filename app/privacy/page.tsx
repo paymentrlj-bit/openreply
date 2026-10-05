@@ -11,8 +11,8 @@ export default function PrivacyPage() {
   return (
     <LegalShell
       title="Privacy Policy"
-      description="OpenReply helps businesses send Meta-compliant private replies when people comment on connected Instagram posts or reels."
-      updatedAt="May 24, 2026"
+      description="This service is operated by RL Enterprises (RL Jewels), Jalgaon. It sends private replies when people comment on our Instagram posts or reels, using the official Meta APIs."
+      updatedAt="October 5, 2026"
     >
       <section>
         <h2 className="text-xl font-bold text-white">Data We Collect</h2>
@@ -48,10 +48,10 @@ export default function PrivacyPage() {
       <section>
         <h2 className="text-xl font-bold text-white">Subprocessors</h2>
         <p className="mt-3">
-          The production service may use hosting, database, Redis queue, email,
-          and observability providers such as Vercel, Railway, PostgreSQL,
-          Redis, and Resend. These providers process data only as needed to run
-          the service.
+          This service uses hosting, database, queue, and email providers
+          such as Vercel, Neon (PostgreSQL), Redis Cloud, and an email delivery
+          provider. These providers process data only as needed to run the
+          service.
         </p>
       </section>
 
@@ -67,8 +67,9 @@ export default function PrivacyPage() {
       <section>
         <h2 className="text-xl font-bold text-white">Contact</h2>
         <p className="mt-3">
-          For privacy questions, contact the repository owner through GitHub or
-          the support email configured for the hosted OpenReply service.
+          For privacy questions, contact RL Enterprises, 169, Balaji Peth,
+          Johari Bazar, Shahunagar, Jalgaon, Maharashtra 425001, India. Email:
+          contact@rljewels.com.
         </p>
       </section>
     </LegalShell>
