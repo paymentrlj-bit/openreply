@@ -46,7 +46,7 @@ export default function TermsPage() {
         <h2 className="text-xl font-bold text-white">Contact</h2>
         <p className="mt-3">
           RL Enterprises, 169, Balaji Peth, Johari Bazar, Shahunagar, Jalgaon,
-          Maharashtra 425001, India. Email: contact@rljewels.com.
+          Maharashtra 425001, India. Email: contact@rljewels.com. Phone: +91 94038 91854.
         </p>
       </section>
 

@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <p className="mt-3">
           For privacy questions, contact RL Enterprises, 169, Balaji Peth,
           Johari Bazar, Shahunagar, Jalgaon, Maharashtra 425001, India. Email:
-          contact@rljewels.com.
+          contact@rljewels.com. Phone: +91 94038 91854.
         </p>
       </section>
     </LegalShell>
