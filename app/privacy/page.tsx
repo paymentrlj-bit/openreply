@@ -48,10 +48,10 @@ export default function PrivacyPage() {
       <section>
         <h2 className="text-xl font-bold text-white">Subprocessors</h2>
         <p className="mt-3">
-          This service uses hosting, database, queue, and email providers
-          such as Vercel, Neon (PostgreSQL), Redis Cloud, and an email delivery
-          provider. These providers process data only as needed to run the
-          service.
+          This service uses the following providers, which process data only
+          as needed to run the service: Vercel (website hosting), Neon
+          (database), Redis Cloud (message queue), Oracle Cloud (the server
+          that sends replies), and an email provider for sign-in emails.
         </p>
       </section>
 
