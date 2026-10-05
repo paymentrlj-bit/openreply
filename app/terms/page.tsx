@@ -11,8 +11,8 @@ export default function TermsPage() {
   return (
     <LegalShell
       title="Terms of Service"
-      description="These terms define acceptable use for OpenReply's hosted Instagram comment-to-DM campaign service."
-      updatedAt="May 24, 2026"
+      description="These terms apply to the Instagram comment-to-DM service operated by RL Enterprises (RL Jewels), Jalgaon."
+      updatedAt="October 5, 2026"
     >
       <section>
         <h2 className="text-xl font-bold text-white">Authorized Use</h2>
@@ -39,6 +39,14 @@ export default function TermsPage() {
           OpenReply depends on third-party platforms including Meta, email,
           hosting, database, and queue providers. We work to operate the
           service reliably, but uninterrupted availability is not guaranteed.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-white">Contact</h2>
+        <p className="mt-3">
+          RL Enterprises, 169, Balaji Peth, Johari Bazar, Shahunagar, Jalgaon,
+          Maharashtra 425001, India. Email: contact@rljewels.com. Phone: +91 94038 91854.
         </p>
       </section>
 
