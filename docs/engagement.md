@@ -34,6 +34,10 @@ A keyword campaign always wins: if a campaign handles a comment or message, smar
 - Reply to a comment inside a thread, or to anything older than 24 hours.
 - Reply to attachment-only messages (a shared post, a photo).
 
+## Daily record
+
+Everything the engine handles is saved in the database (the `EngagementLog` table). At 9 pm India time it emails a summary with a spreadsheet attached that lists every comment and message, what the engine did and the reply it sent.
+
 ## Safeguards
 
 - **Test mode first.** In `dry-run` it decides and records everything but sends nothing.

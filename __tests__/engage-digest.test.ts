@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDigest, istParts } from "@/lib/engage/digest";
+import { formatDigest, formatDigestCsv, istParts } from "@/lib/engage/digest";
 import { parseCommentEvents } from "@/lib/meta/webhook";
 
 describe("istParts", () => {
@@ -77,5 +77,31 @@ describe("parseCommentEvents parent id", () => {
     });
     expect(events).toHaveLength(1);
     expect(events[0].parentId).toBe("c1");
+  });
+});
+
+describe("formatDigestCsv", () => {
+  it("lists every row, keeps Marathi and quotes, and defuses formulas", () => {
+    const csv = formatDigestCsv([
+      {
+        createdAt: new Date("2026-10-10T10:00:00Z"),
+        confidence: 0.93,
+        targetType: "COMMENT",
+        category: "praise",
+        language: "mr",
+        action: "REPLIED",
+        text: "=HYPERLINK(\"x\") खूप सुंदर",
+        replyText: 'Thank you, "friend" 🙏',
+        reason: null,
+        usedFallback: false,
+      },
+    ]);
+    expect(csv.startsWith("\uFEFF")).toBe(true);
+    const [header, line] = csv.slice(1).split("\r\n");
+    expect(header).toContain("Our reply");
+    expect(line).toContain("15:30");
+    expect(line).toContain("'=HYPERLINK");
+    expect(line).toContain("खूप सुंदर");
+    expect(line).toContain('"Thank you, ""friend"" 🙏"');
   });
 });

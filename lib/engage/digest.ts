@@ -29,7 +29,9 @@ function clip(text: string | null | undefined, max: number): string {
   return flat.length > max ? `${flat.slice(0, max)}…` : flat;
 }
 
-interface DigestRow {
+export interface DigestRow {
+  createdAt?: Date;
+  confidence?: number | null;
   targetType: "COMMENT" | "MESSAGE";
   category: string | null;
   language: string | null;
@@ -38,6 +40,49 @@ interface DigestRow {
   replyText: string | null;
   reason: string | null;
   usedFallback: boolean;
+}
+
+/** One CSV cell. Text starting with = + - @ is defused so a spreadsheet cannot run it as a formula. */
+function csvCell(value: string | number | null | undefined): string {
+  let text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (/^[=+\-@]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+/** Every item the engine handled, one row each, for opening in Excel or Google Sheets. */
+export function formatDigestCsv(rows: DigestRow[]): string {
+  const header = [
+    "Time (India)",
+    "Type",
+    "Category",
+    "Language",
+    "Confidence",
+    "What the engine did",
+    "Why",
+    "Their comment or message",
+    "Our reply",
+    "Fixed reply used",
+  ];
+  const lines = rows.map((row) =>
+    [
+      row.createdAt
+        ? row.createdAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: false })
+        : "",
+      row.targetType === "COMMENT" ? "comment" : "message",
+      row.category,
+      row.language,
+      row.confidence != null ? row.confidence.toFixed(2) : "",
+      row.action,
+      row.reason,
+      row.text,
+      row.replyText,
+      row.usedFallback ? "yes" : "no",
+    ]
+      .map(csvCell)
+      .join(",")
+  );
+  // The leading byte-order mark makes Excel read Marathi (UTF-8) correctly.
+  return `\uFEFF${[header.map(csvCell).join(","), ...lines].join("\r\n")}`;
 }
 
 export function formatDigest(rows: DigestRow[], mode: string, date: string): string | null {
@@ -52,6 +97,8 @@ export function formatDigest(rows: DigestRow[], mode: string, date: string): str
     "",
     `Looked at ${rows.length} comments and messages in the last 24 hours:`,
     ...[...counts.entries()].map(([action, n]) => `  ${action}: ${n}`),
+    "",
+    "The attached spreadsheet lists every one of them with our reply.",
   ];
 
   const section = (title: string, items: DigestRow[], showReply: boolean) => {
@@ -96,6 +143,8 @@ export async function maybeSendDigest(
     where: { createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) } },
     orderBy: { createdAt: "asc" },
     select: {
+      createdAt: true,
+      confidence: true,
       targetType: true,
       category: true,
       language: true,
@@ -108,7 +157,8 @@ export async function maybeSendDigest(
   });
 
   const body = formatDigest(rows, config.mode, date);
-  if (body && !(await notifyOwner(config, `Smart replies digest, ${date}`, body))) {
+  const attachment = { filename: `smart-replies-${date}.csv`, content: formatDigestCsv(rows) };
+  if (body && !(await notifyOwner(config, `Smart replies digest, ${date}`, body, [attachment]))) {
     // Email failed: try again at the next check.
     return;
   }
