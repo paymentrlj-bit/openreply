@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db/client';
 import { getDMQueue, MESSAGE_JOB_NAME, POSTBACK_JOB_NAME } from '@/lib/queue/client';
-import { parseCommentEvents, parseMessageEvents, parsePostbackEvents, parseReadEvents } from '@/lib/meta/webhook';
+import { parseAttachmentMessageEvents, parseCommentEvents, parseMessageEvents, parsePostbackEvents, parseReadEvents } from '@/lib/meta/webhook';
 import { Prisma, type InstagramProvider } from '@/app/generated/prisma/client';
 import { enqueueEngageComment, enqueueEngageMessage } from '@/lib/engage/queue';
 
@@ -147,6 +147,26 @@ export async function processInstagramWebhook({ payload: incoming, provider, wor
           data: { workspaceId: account.workspaceId },
         });
       }
+    }
+
+    // Messages with only an attachment (a shared reel, a photo, a voice note)
+    // cannot trigger a keyword campaign; the engagement engine handles them.
+    for (const event of parseAttachmentMessageEvents(
+      payload as Parameters<typeof parseAttachmentMessageEvents>[0]
+    )) {
+      const account = accountMap.get(event.instagramAccountId);
+      if (!account) continue;
+      await enqueueEngageMessage({
+        accountConnectionId: account.id,
+        instagramAccountId: event.instagramAccountId,
+        messageId: event.messageId,
+        messageText:
+          event.attachmentKind === "share"
+            ? "[shared a post or reel]"
+            : "[sent a photo, video or voice message]",
+        senderId: event.senderId,
+        attachmentKind: event.attachmentKind,
+      });
     }
 
     // If a user reads the opening DM and never taps the button, deliver the

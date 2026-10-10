@@ -305,6 +305,31 @@ describe("processMessage", () => {
     expect(h.rows[0].action).toBe("REPLIED");
   });
 
+  it("thanks someone who shares a reel, without calling the model or a campaign", async () => {
+    const h = harness({
+      dmRules: [{ keywords: [], wholeWordMatch: false, matchAnyWord: true }],
+    });
+    await processMessage(
+      h.deps,
+      messageJob({ messageText: "[shared a post or reel]", attachmentKind: "share" })
+    );
+    expect(h.calls.classifyDm).not.toHaveBeenCalled();
+    expect(h.calls.directMessage).toHaveBeenCalledTimes(1);
+    expect(h.rows[0].action).toBe("REPLIED");
+  });
+
+  it("tells the owner about a photo, video or voice message instead of replying", async () => {
+    const h = harness();
+    await processMessage(
+      h.deps,
+      messageJob({ messageText: "[sent a photo, video or voice message]", attachmentKind: "media" })
+    );
+    expect(h.calls.classifyDm).not.toHaveBeenCalled();
+    expect(h.calls.directMessage).not.toHaveBeenCalled();
+    expect(h.rows[0].action).toBe("FLAGGED");
+    expect(h.calls.notify.mock.calls[0]?.[1]).toContain("photo, video or voice message");
+  });
+
   it("emails the owner about a real message instead of replying", async () => {
     const h = harness({ dm: { category: "other", language: "en", confidence: 0.9, reply: "" } });
     await processMessage(h.deps, messageJob({ messageText: "I ordered a gift for my sister" }));

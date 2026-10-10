@@ -245,6 +245,64 @@ export function parseMessageEvents(
   return events;
 }
 
+export type AttachmentKind = "share" | "media";
+
+export interface WebhookAttachmentMessageEvent {
+  instagramAccountId: string;
+  messageId: string;
+  senderId: string;
+  // "share": a post, reel or story sent or mentioned. "media": a photo, video,
+  // voice message or file.
+  attachmentKind: AttachmentKind;
+}
+
+const SHARE_ATTACHMENT_TYPES = new Set([
+  "share",
+  "ig_reel",
+  "ig_post",
+  "ig_story",
+  "reel",
+  "story_mention",
+]);
+
+/**
+ * Inbound DMs that carry only an attachment and no text, for example someone
+ * sharing a reel with the shop. The keyword autoreply cannot match these, but
+ * the smart engagement engine thanks the sender or alerts the owner.
+ */
+export function parseAttachmentMessageEvents(
+  payload: WebhookPayload
+): WebhookAttachmentMessageEvent[] {
+  const events: WebhookAttachmentMessageEvent[] = [];
+  if (payload.object !== "instagram") return events;
+
+  for (const entry of payload.entry ?? []) {
+    for (const messaging of entry.messaging ?? []) {
+      const message = messaging.message;
+      if (!message) continue;
+      if (message.is_echo || message.is_deleted || message.is_unsupported) continue;
+      if (message.text?.trim()) continue;
+
+      const types = (message.attachments ?? []).map((a) => a.type ?? "");
+      const messageId = message.mid;
+      const senderId = messaging.sender?.id;
+      const accountId = entry.id ?? messaging.recipient?.id;
+      if (types.length === 0 || !messageId || !senderId || !accountId) continue;
+      if (senderId === accountId) continue;
+
+      events.push({
+        instagramAccountId: accountId,
+        messageId,
+        senderId,
+        attachmentKind: types.every((type) => SHARE_ATTACHMENT_TYPES.has(type))
+          ? "share"
+          : "media",
+      });
+    }
+  }
+  return events;
+}
+
 /**
  * Parse Instagram DM read receipts. When a user reads an opening DM but does
  * not tap its button, the webhook route uses this to schedule the reveal after
