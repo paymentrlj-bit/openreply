@@ -31,6 +31,7 @@ describe("readEngageConfig", () => {
       apiKey: "key",
       model: "some/model",
       baseUrl: "https://example.test/v1",
+      denyDataCollection: true,
     });
     // The maximum delay can never be below the minimum.
     expect(c.maxDelaySeconds).toBe(100);
@@ -107,6 +108,30 @@ describe("generateJson", () => {
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("https://openrouter.ai/api/v1/chat/completions");
     expect((init.headers as Record<string, string>).Authorization).toBe("Bearer k");
+  });
+
+  it("asks OpenRouter to avoid providers that keep or train on prompts", async () => {
+    const make = (extra: Record<string, string> = {}) =>
+      readEngageConfig({
+        ENGAGE_LLM_PROVIDER: "openai",
+        ENGAGE_LLM_API_KEY: "k",
+        ENGAGE_LLM_MODEL: "m",
+        ...extra,
+      });
+    const bodyFor = async (config: ReturnType<typeof make>) => {
+      const fetchMock = vi.fn(async () =>
+        jsonResponse({ choices: [{ message: { content: "{}" } }] })
+      );
+      await generateJson(config, "S", "U", fetchMock);
+      return JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body));
+    };
+
+    expect((await bodyFor(make())).provider).toEqual({ data_collection: "deny" });
+    // Can be switched off, and is never sent to other services.
+    expect((await bodyFor(make({ ENGAGE_LLM_DENY_DATA_COLLECTION: "false" }))).provider).toBeUndefined();
+    expect(
+      (await bodyFor(make({ ENGAGE_LLM_BASE_URL: "https://api.example.test/v1" }))).provider
+    ).toBeUndefined();
   });
 
   it("marks rate limits and server errors as retryable, other errors as not", async () => {

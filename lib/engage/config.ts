@@ -14,6 +14,9 @@ export interface EngageConfig {
     model: string;
     // Only used by the "openai" provider (OpenRouter and any OpenAI-compatible API).
     baseUrl: string;
+    // On OpenRouter, only route to providers that do not keep or train on
+    // prompts. Ignored for other services.
+    denyDataCollection: boolean;
   };
   maxPerHour: number;
   maxPerDay: number;
@@ -72,6 +75,7 @@ export function readEngageConfig(
       baseUrl: (env.ENGAGE_LLM_BASE_URL ?? "https://openrouter.ai/api/v1")
         .trim()
         .replace(/\/+$/, ""),
+      denyDataCollection: bool(env.ENGAGE_LLM_DENY_DATA_COLLECTION, true),
     },
     maxPerHour: Math.max(1, num(env.ENGAGE_MAX_PER_HOUR, 20)),
     maxPerDay: Math.max(1, num(env.ENGAGE_MAX_PER_DAY, 120)),
