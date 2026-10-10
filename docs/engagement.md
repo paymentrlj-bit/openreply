@@ -41,7 +41,7 @@ Before calling the AI model, the engine checks for the most common comments and 
 - Short comments asking the rate or price are answered with the RATE invitation, and those asking where the shop is with the LOCATION invitation, in the person's language.
 - Short comments that are only praise ("so beautiful", "खूप सुंदर आहे") get a thank-you.
 - Anything that sounds unhappy always goes to the AI model, never to the FAQ.
-- The owner's own answers (timings, exchange of old gold, hallmark and so on) go in `lib/engage/faq-entries.ts`, with keywords and a reply per language. They are used for comments and for direct messages, and are sent exactly as written.
+- The owner's own answers (timings, old gold, hallmark, schemes, delivery, payments, making charges, custom orders, repairs, contact and so on) are in `lib/engage/faq-entries.ts`, with keywords and a reply in English, Marathi, Marathi in English letters, Hindi and Hinglish. They are used for comments and for direct messages, and are sent exactly as written. Latin keywords match whole words only.
 - Switch the whole FAQ off with `ENGAGE_FAQ=false`.
 
 ## Daily record
