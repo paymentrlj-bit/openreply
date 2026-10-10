@@ -9,7 +9,8 @@ import type { EngageConfig } from "./config";
 export async function notifyOwner(
   config: Pick<EngageConfig, "alertEmail">,
   subject: string,
-  body: string
+  body: string,
+  attachments: Array<{ filename: string; content: string }> = []
 ): Promise<boolean> {
   if (!config.alertEmail) return false;
   const server = process.env.EMAIL_SERVER;
@@ -24,6 +25,7 @@ export async function notifyOwner(
       to: config.alertEmail,
       subject,
       text: body,
+      ...(attachments.length > 0 ? { attachments } : {}),
     });
     return true;
   } catch (error) {
