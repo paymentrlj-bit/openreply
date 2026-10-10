@@ -69,9 +69,19 @@ function isPlainPraise(normalised: string): boolean {
   return words.length > 0 && words.every((word) => PRAISE_WORDS.has(word));
 }
 
+/** Devanagari keywords match anywhere; Latin ones only as whole words or phrases. */
+function hasKeyword(normalised: string, keyword: string): boolean {
+  const wanted = normalise(keyword);
+  if (!wanted) return false;
+  if (DEVANAGARI.test(wanted)) return normalised.includes(wanted);
+  return ` ${normalised} `.includes(` ${wanted} `);
+}
+
 function customHit(normalised: string, language: FaqLanguage, entries: FaqEntry[]): FaqHit | null {
+  const askingPrice = PRICE.test(normalised);
   for (const entry of entries) {
-    if (!entry.keywords.some((keyword) => normalised.includes(keyword.toLowerCase()))) continue;
+    if (entry.yieldsToRate && askingPrice) continue;
+    if (!entry.keywords.some((keyword) => hasKeyword(normalised, keyword))) continue;
     const reply = entry.replies[language] ?? entry.replies.en;
     if (reply) return { category: "question_other", language, reply };
   }

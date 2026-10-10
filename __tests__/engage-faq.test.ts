@@ -9,7 +9,7 @@ const config = readEngageConfig({ ENGAGE_MODE: "live", ENGAGE_LLM_API_KEY: "k" }
 
 const timings: FaqEntry = {
   id: "timings",
-  keywords: ["timing", "kitne baje", "वेळ"],
+  keywords: ["timing", "timings", "kitne baje", "वेळ"],
   replies: { en: "We are open 10 am to 8 pm every day 🙏", mr: "आम्ही रोज १० ते ८ उघडे असतो 🙏" },
 };
 
@@ -99,5 +99,64 @@ describe("FAQ in the engine", () => {
     const generate = vi.fn(async () => ({ category: "question", language: "en", confidence: 0.9, reply: "" }));
     await classifyDm(config, "What is the rate today?", generate);
     expect(generate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("the shop's own FAQ entries", () => {
+  it("has English and Marathi text, short replies and no leftover placeholders", async () => {
+    const { CUSTOM_FAQ } = await import("@/lib/engage/faq-entries");
+    const ids = new Set<string>();
+    for (const entry of CUSTOM_FAQ) {
+      expect(ids.has(entry.id)).toBe(false);
+      ids.add(entry.id);
+      expect(entry.keywords.length).toBeGreaterThan(0);
+      expect(entry.replies.en).toBeTruthy();
+      expect(entry.replies.mr).toBeTruthy();
+      expect(/[ऀ-ॿ]/.test(entry.replies.mr!)).toBe(true);
+      expect(/[ऀ-ॿ]/.test(entry.replies.mr_latn ?? "")).toBe(false);
+      for (const reply of Object.values(entry.replies)) {
+        expect([...reply!].length).toBeLessThanOrEqual(420);
+      }
+    }
+  });
+
+  it.each([
+    ["What are your timings?", "10 am"],
+    ["दुकानाची वेळ काय आहे", "रात्री ९"],
+    ["Do you buy old gold?", "old gold"],
+    ["is it hallmarked", "BIS"],
+    ["do you take bridal orders", "custom and bridal"],
+    ["can you ship to Delhi", "all over India"],
+    ["UPI accepted?", "UPI"],
+    ["making charges?", "5.99%"],
+    ["any gold scheme?", "Suvarna Vrudhi Yojana"],
+    ["can I exchange later", "100 days"],
+    ["do you have silver", "silver"],
+    ["do you repair rings", "repair"],
+    ["need an appointment?", "No appointment"],
+    ["whatsapp number please", "9850501854"],
+  ])("answers %s", async (text, expected) => {
+    const { CUSTOM_FAQ } = await import("@/lib/engage/faq-entries");
+    const hit = matchFaq(text, "comment", "s", CUSTOM_FAQ);
+    expect(hit?.reply).toContain(expected);
+  });
+
+  it("answers old gold before general exchange, and yields to rate questions", async () => {
+    const { CUSTOM_FAQ } = await import("@/lib/engage/faq-entries");
+    expect(matchFaq("old gold exchange", "message", "s", CUSTOM_FAQ)?.reply).toContain("full value");
+    expect(matchFaq("silver rate today", "comment", "s", CUSTOM_FAQ)?.category).toBe("question_price");
+    expect(matchFaq("gold rate whatsapp", "comment", "s", CUSTOM_FAQ)?.category).toBe("question_price");
+  });
+
+  it("matches Latin keywords as whole words only, and ignores unhappy comments", async () => {
+    const { CUSTOM_FAQ } = await import("@/lib/engage/faq-entries");
+    expect(matchFaq("I love the biscuit shaped pendant", "comment", "s", CUSTOM_FAQ)).toBeNull();
+    expect(matchFaq("delivery was late and bad", "message", "s", CUSTOM_FAQ)).toBeNull();
+  });
+
+  it("answers in the customer's language", async () => {
+    const { CUSTOM_FAQ } = await import("@/lib/engage/faq-entries");
+    expect(matchFaq("hallmark aahe ka", "comment", "s", CUSTOM_FAQ)?.reply).toContain("hallmark asleale");
+    expect(matchFaq("hallmark hai kya", "comment", "s", CUSTOM_FAQ)?.reply).toContain("hallmarked hain");
   });
 });
