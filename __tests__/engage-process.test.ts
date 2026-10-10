@@ -205,7 +205,7 @@ describe("processComment", () => {
   });
 
   it("stops at the hourly and daily limits", async () => {
-    const h = harness({ counts: { sent: 20 } });
+    const h = harness({ counts: { sent: 60 } });
     await processComment(h.deps, commentJob());
     expect(h.rows[0].action).toBe("SKIPPED");
     expect(h.rows[0].update.reason).toBe("hourly limit reached");

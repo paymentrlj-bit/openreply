@@ -7,7 +7,8 @@ describe("readEngageConfig", () => {
     const c = readEngageConfig({});
     expect(c.mode).toBe("off");
     expect(c.llm.provider).toBe("gemini");
-    expect(c.maxPerHour).toBe(20);
+    expect(c.maxPerHour).toBe(60);
+    expect(c.maxPerDay).toBe(500);
     expect(c.complaintDm).toBe(true);
     expect(c.alertEmail).toBeNull();
   });
@@ -30,6 +31,7 @@ describe("readEngageConfig", () => {
       provider: "openai",
       apiKey: "key",
       model: "some/model",
+      fallbackModel: "",
       baseUrl: "https://example.test/v1",
       denyDataCollection: true,
     });
@@ -138,6 +140,39 @@ describe("generateJson", () => {
     expect(
       (await bodyFor(make({ ENGAGE_LLM_BASE_URL: "https://api.example.test/v1" }))).provider
     ).toBeUndefined();
+  });
+
+  it("tries the fallback model once when the main model is rate limited", async () => {
+    const config = readEngageConfig({
+      ENGAGE_LLM_PROVIDER: "openai",
+      ENGAGE_LLM_API_KEY: "k",
+      ENGAGE_LLM_MODEL: "main",
+      ENGAGE_LLM_FALLBACK_MODEL: "vendor/free-model:free",
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({}, 429))
+      .mockResolvedValueOnce(jsonResponse({ choices: [{ message: { content: '{"ok":1}' } }] }));
+    expect(await generateJson(config, "S", "U", fetchMock)).toEqual({ ok: 1 });
+    const bodies = fetchMock.mock.calls.map((call) =>
+      JSON.parse(String((call as unknown as [string, RequestInit])[1].body))
+    );
+    expect(bodies[0].model).toBe("main");
+    expect(bodies[0].provider).toEqual({ data_collection: "deny" });
+    expect(bodies[1].model).toBe("vendor/free-model:free");
+    expect(bodies[1].provider).toBeUndefined();
+  });
+
+  it("does not use the fallback for errors that retrying cannot fix", async () => {
+    const config = readEngageConfig({
+      ENGAGE_LLM_PROVIDER: "openai",
+      ENGAGE_LLM_API_KEY: "k",
+      ENGAGE_LLM_MODEL: "main",
+      ENGAGE_LLM_FALLBACK_MODEL: "other",
+    });
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({}, 401));
+    await expect(generateJson(config, "S", "U", fetchMock)).rejects.toMatchObject({ status: 401 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("marks rate limits and server errors as retryable, other errors as not", async () => {

@@ -12,6 +12,8 @@ export interface EngageConfig {
     provider: LlmProvider;
     apiKey: string;
     model: string;
+    // Tried once when the main model is rate limited or down. Empty = none.
+    fallbackModel: string;
     // Only used by the "openai" provider (OpenRouter and any OpenAI-compatible API).
     baseUrl: string;
     // On OpenRouter, only route to providers that do not keep or train on
@@ -72,13 +74,14 @@ export function readEngageConfig(
       model:
         (env.ENGAGE_LLM_MODEL ?? "").trim() ||
         (provider === "gemini" ? "gemini-flash-latest" : ""),
+      fallbackModel: (env.ENGAGE_LLM_FALLBACK_MODEL ?? "").trim(),
       baseUrl: (env.ENGAGE_LLM_BASE_URL ?? "https://openrouter.ai/api/v1")
         .trim()
         .replace(/\/+$/, ""),
       denyDataCollection: bool(env.ENGAGE_LLM_DENY_DATA_COLLECTION, true),
     },
-    maxPerHour: Math.max(1, num(env.ENGAGE_MAX_PER_HOUR, 20)),
-    maxPerDay: Math.max(1, num(env.ENGAGE_MAX_PER_DAY, 120)),
+    maxPerHour: Math.max(1, num(env.ENGAGE_MAX_PER_HOUR, 60)),
+    maxPerDay: Math.max(1, num(env.ENGAGE_MAX_PER_DAY, 500)),
     minDelaySeconds: minDelay,
     maxDelaySeconds: maxDelay,
     maxAgeHours: Math.max(1, num(env.ENGAGE_MAX_AGE_HOURS, 24)),

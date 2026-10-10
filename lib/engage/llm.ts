@@ -62,14 +62,49 @@ async function post(
 }
 
 /**
- * Asks the configured model for a JSON answer. Only `system` and `user` text
- * leave the server: never account tokens, usernames or ids.
+ * Asks the configured model for a JSON answer. When the main model is rate
+ * limited or down, the optional fallback model is tried once.
  */
 export async function generateJson(
   config: EngageConfig,
   system: string,
   user: string,
   fetchImpl: FetchLike = fetch
+): Promise<unknown> {
+  try {
+    return await generateWith(config, system, user, fetchImpl);
+  } catch (error) {
+    const fallback = config.llm.fallbackModel;
+    if (!(error instanceof LlmError) || !error.retryable || !fallback || fallback === config.llm.model) {
+      throw error;
+    }
+    return generateWith(
+      {
+        ...config,
+        llm: {
+          ...config.llm,
+          model: fallback,
+          // Free models only run on providers that may keep prompts, so the
+          // "deny" setting would make every request fail.
+          denyDataCollection: config.llm.denyDataCollection && !fallback.endsWith(":free"),
+        },
+      },
+      system,
+      user,
+      fetchImpl
+    );
+  }
+}
+
+/**
+ * One request to the configured model. Only `system` and `user` text
+ * leave the server: never account tokens, usernames or ids.
+ */
+async function generateWith(
+  config: EngageConfig,
+  system: string,
+  user: string,
+  fetchImpl: FetchLike
 ): Promise<unknown> {
   const { provider, apiKey, model, baseUrl } = config.llm;
 

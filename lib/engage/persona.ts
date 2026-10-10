@@ -17,7 +17,7 @@ const MARATHI_STYLE = `Marathi quality rules (very important):
 - Use "तुम्ही / तुमचे" (respectful), never "तू / तुझे".
 - Use these proven phrases when they fit: "मनापासून धन्यवाद", "तुमच्या प्रेमाबद्दल आभारी आहोत", "पुन्हा नक्की भेट द्या", "आमच्या दुकानाला भेट द्या", "आम्हाला DM करा".
 - For mr_latn use the same Marathi, written in English letters: "aahe", "aahot", "tumhi", "tumche", "khup", "dhanyawad", "nakki". Never "hai", "aapka", "bahut", "shukriya".
-- If you are not sure you can write the Marathi correctly, lower the confidence below 0.7 and return an empty reply.
+- If you are not sure you can write the Marathi correctly, answer in simple, warm English instead and set language to "en". Never leave the reply empty for that reason.
 
 `;
 

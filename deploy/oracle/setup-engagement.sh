@@ -87,12 +87,15 @@ ask "API key for that service. Use a key made just for this, ideally with a spen
 api_key="$ANSWER"
 
 base_url=""
+fallback_model=""
 if [ "$provider" = "gemini" ]; then
   ask "Model name. Press Enter for the default." '^[A-Za-z0-9._/:-]+$' 0 gemini-flash-latest
   model="$ANSWER"
 else
   ask "Model name exactly as listed on openrouter.ai/models, for example anthropic/claude-haiku-4.5." '^[A-Za-z0-9._/:-]+$' 0
   model="$ANSWER"
+  ask "Backup model, used only if the main one is busy or rate limited. Press Enter for none. A name ending in :free sends comment text to providers that may keep it." '^([A-Za-z0-9._/:-]+)?$' 1 ""
+  fallback_model="$ANSWER"
   ask "Service address. Press Enter for OpenRouter." '^https://[^[:space:]]+$' 0 https://openrouter.ai/api/v1
   base_url="${ANSWER%/}"
 fi
@@ -144,6 +147,7 @@ setvar ENGAGE_LLM_PROVIDER "$provider"
 setvar ENGAGE_LLM_API_KEY "$api_key"
 setvar ENGAGE_LLM_MODEL "$model"
 if [ -n "$base_url" ]; then setvar ENGAGE_LLM_BASE_URL "$base_url"; fi
+setvar ENGAGE_LLM_FALLBACK_MODEL "$fallback_model"
 
 ask "Email address that should receive alerts and the daily summary." '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' 0
 setvar ENGAGE_ALERT_EMAIL "$ANSWER"
