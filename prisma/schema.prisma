@@ -81,6 +81,7 @@ model Workspace {
   instagramAccounts InstagramAccount[]
   automations       Automation[]
   dmLogs            DmLog[]
+  engagementLogs    EngagementLog[]
   trackedLinks      TrackedLink[]
   linkClicks        LinkClick[]
   webhookEvents     WebhookEvent[]
@@ -142,6 +143,7 @@ model InstagramAccount {
   workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   automations Automation[]
   dmLogs      DmLog[]
+  engagementLogs EngagementLog[]
   linkClicks  LinkClick[]
   followerSnapshots FollowerSnapshot[]
 
@@ -353,6 +355,58 @@ model OperationalEvent {
   @@index([source])
   @@index([level])
   @@index([createdAt])
+}
+
+// Smart engagement: every comment or DM the engagement engine looked at, what
+// it decided and what it sent. Doubles as the dedupe record (one row per
+// target) and as the source for per-hour/day caps and the daily digest.
+enum EngagementTarget {
+  COMMENT
+  MESSAGE
+}
+
+enum EngagementAction {
+  PENDING
+  SENDING
+  REPLIED
+  DM_SENT
+  FLAGGED
+  DRY_RUN
+  IGNORED
+  SKIPPED
+  ERROR
+  UNCONFIRMED
+}
+
+model EngagementLog {
+  id                 String           @id @default(cuid())
+  workspaceId        String
+  instagramAccountId String
+  targetType         EngagementTarget
+  // Comment id or message id.
+  targetId           String
+  // Commenter or sender id.
+  authorId           String
+  // Truncated to 500 characters when written.
+  text               String
+  category           String?
+  language           String?
+  confidence         Float?
+  action             EngagementAction @default(PENDING)
+  reason             String?
+  replyText          String?
+  usedFallback       Boolean          @default(false)
+  errorMessage       String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  instagramAccount InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([instagramAccountId, targetType, targetId])
+  @@index([workspaceId, createdAt])
+  @@index([instagramAccountId, action, createdAt])
+  @@index([authorId, createdAt])
 }
 
 enum WorkspaceRole {

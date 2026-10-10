@@ -2,9 +2,11 @@ import { createDMWorker } from "@/lib/queue/dm-worker";
 import { recordWorkerHeartbeat } from "@/lib/ops/worker-health";
 import { reconcileComments } from "@/lib/polling/comment-reconciler";
 import { attachPendingNextReels } from "@/lib/automation/attach-next-reel";
+import { startEngagement } from "@/lib/engage/worker";
 import os from "node:os";
 
 const worker = createDMWorker();
+const engagement = startEngagement();
 const startedAt = new Date().toISOString();
 const HEARTBEAT_INTERVAL_MS = 30_000;
 // Polling safety net for comments that webhooks miss. Runs in the worker because
@@ -53,6 +55,7 @@ async function shutdown(signal: string) {
   clearInterval(heartbeatTimer);
   clearInterval(pollTimer);
   await worker.close();
+  await engagement.stop();
   process.exit(0);
 }
 

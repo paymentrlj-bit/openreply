@@ -45,6 +45,8 @@ export interface WebhookCommentEvent {
    * matching has to consider it as well as mediaId.
    */
   originalMediaId?: string;
+  /** Set when the comment is a reply inside another comment's thread. */
+  parentId?: string;
 }
 
 interface WebhookEntry {
@@ -69,6 +71,8 @@ interface WebhookEntry {
         media_product_type?: string;
       };
       media_id?: string;
+      // Present when the comment is a reply inside another comment's thread.
+      parent_id?: string;
     };
   }>;
   messaging?: Array<{
@@ -154,6 +158,7 @@ export function parseCommentEvents(payload: WebhookPayload): WebhookCommentEvent
         commenterName: value.from?.username,
         mediaId,
         originalMediaId,
+        parentId: value.parent_id,
       });
     }
   }

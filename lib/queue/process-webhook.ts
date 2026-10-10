@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/client';
 import { getDMQueue, MESSAGE_JOB_NAME, POSTBACK_JOB_NAME } from '@/lib/queue/client';
 import { parseCommentEvents, parseMessageEvents, parsePostbackEvents, parseReadEvents } from '@/lib/meta/webhook';
 import { Prisma, type InstagramProvider } from '@/app/generated/prisma/client';
+import { enqueueEngageComment, enqueueEngageMessage } from '@/lib/engage/queue';
 
 const OPENING_DM_READ_FALLBACK_DELAY_MS = 5 * 60 * 1000;
 type InstagramPayload = Parameters<typeof parseCommentEvents>[0];
@@ -57,6 +58,18 @@ export async function processInstagramWebhook({ payload: incoming, provider, wor
           jobId: `comment_${event.instagramAccountId}_${event.commentId}`,
         }
       );
+
+      // Comments no campaign handles go to the smart engagement engine.
+      await enqueueEngageComment({
+        accountConnectionId: account.id,
+        instagramAccountId: event.instagramAccountId,
+        commentId: event.commentId,
+        commentText: event.commentText,
+        commenterId: event.commenterId,
+        mediaId: event.mediaId,
+        originalMediaId: event.originalMediaId,
+        parentId: event.parentId,
+      });
 
       if (account) {
         await prisma.webhookEvent.update({
@@ -119,6 +132,14 @@ export async function processInstagramWebhook({ payload: incoming, provider, wor
           ).toString("base64url")}`,
         }
       );
+
+      await enqueueEngageMessage({
+        accountConnectionId: account.id,
+        instagramAccountId: event.instagramAccountId,
+        messageId: event.messageId,
+        messageText: event.messageText,
+        senderId: event.senderId,
+      });
 
       if (account) {
         await prisma.webhookEvent.update({
