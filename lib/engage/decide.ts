@@ -50,6 +50,11 @@ export function decideComment(
     return { kind: "ignore", reason: "low confidence" };
   }
 
+  // A fixed FAQ answer: sent as written.
+  if (c.trusted && c.reply) {
+    return { kind: "public_reply", text: c.reply, usedFallback: false };
+  }
+
   switch (c.category) {
     case "spam":
     case "other":
@@ -93,6 +98,11 @@ export function decideDm(
     return config.dmReactions
       ? { kind: "reply", text: pickReactionReply(seed), usedFallback: true }
       : { kind: "ignore", reason: "reaction replies switched off" };
+  }
+
+  // A fixed answer written by the owner: sent as written.
+  if (c.trusted && c.reply) {
+    return { kind: "reply", text: c.reply, usedFallback: false };
   }
 
   // Anything uncertain goes to a person rather than getting a canned answer.

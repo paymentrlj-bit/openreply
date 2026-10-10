@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { EngageConfig } from "./config";
+import { matchFaq } from "./faq";
 import { generateJson } from "./llm";
 import {
   commentSystemPrompt,
@@ -43,6 +44,12 @@ export async function classifyComment(
   if (isEmojiOnly(text)) {
     return { category: "emoji_only", language: "other", confidence: 1, reply: "" };
   }
+  if (config.faq) {
+    const hit = matchFaq(text, "comment", text);
+    if (hit) {
+      return { ...hit, confidence: 1, trusted: true };
+    }
+  }
   const raw = await generate(
     config,
     commentSystemPrompt(config.extraRules),
@@ -63,6 +70,12 @@ export async function classifyDm(
 ): Promise<Classification<DmCategory>> {
   if (isEmojiOnly(text)) {
     return { category: "reaction", language: "other", confidence: 1, reply: "" };
+  }
+  if (config.faq) {
+    const hit = matchFaq(text, "message", text);
+    if (hit) {
+      return { category: "thanks", language: hit.language, confidence: 1, reply: hit.reply, trusted: true };
+    }
   }
   const raw = await generate(
     config,

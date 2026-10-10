@@ -29,4 +29,7 @@ export interface Classification<C extends string> {
   confidence: number;
   // Public reply, private feedback message, or "" depending on the category.
   reply: string;
+  // Answered from the fixed FAQ rules without the AI model, so the reply is
+  // trusted as written and is not run through the AI safety checks.
+  trusted?: boolean;
 }
