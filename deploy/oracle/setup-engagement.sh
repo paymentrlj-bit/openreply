@@ -82,20 +82,68 @@ echo "Smart replies setup. Your answers are saved in $ENV_FILE (readable only by
 
 ask "Which AI service? Type gemini (Google AI Studio) or openai (OpenRouter or any OpenAI-compatible service)." '^(gemini|openai)$' 0 gemini
 provider="$ANSWER"
-setvar ENGAGE_LLM_PROVIDER "$provider"
 
-ask "API key for that service." '^[A-Za-z0-9._-]{16,}$' 1
-setvar ENGAGE_LLM_API_KEY "$ANSWER"
+ask "API key for that service. Use a key made just for this, ideally with a spending limit." '^[A-Za-z0-9._-]{16,}$' 1
+api_key="$ANSWER"
 
+base_url=""
 if [ "$provider" = "gemini" ]; then
   ask "Model name. Press Enter for the default." '^[A-Za-z0-9._/:-]+$' 0 gemini-flash-latest
-  setvar ENGAGE_LLM_MODEL "$ANSWER"
+  model="$ANSWER"
 else
-  ask "Model name, for example one listed on openrouter.ai." '^[A-Za-z0-9._/:-]+$' 0
-  setvar ENGAGE_LLM_MODEL "$ANSWER"
+  ask "Model name exactly as listed on openrouter.ai/models, for example anthropic/claude-haiku-4.5." '^[A-Za-z0-9._/:-]+$' 0
+  model="$ANSWER"
   ask "Service address. Press Enter for OpenRouter." '^https://[^[:space:]]+$' 0 https://openrouter.ai/api/v1
-  setvar ENGAGE_LLM_BASE_URL "$ANSWER"
+  base_url="${ANSWER%/}"
 fi
+
+# Sends one tiny request, so a wrong key or model name shows up now and not
+# later in the logs. The key goes to curl on standard input, never on its
+# command line.
+test_llm() {
+  local provider="$1" key="$2" model="$3" base="$4" out code detail
+  out="$(mktemp)"
+  if [ "$provider" = "gemini" ]; then
+    code="$(printf 'header = "x-goog-api-key: %s"\n' "$key" | curl -sS -K - -o "$out" -w '%{http_code}' -m 45 \
+      "${GEMINI_BASE:-https://generativelanguage.googleapis.com/v1beta}/models/${model}:generateContent" \
+      -H 'Content-Type: application/json' \
+      -d '{"contents":[{"parts":[{"text":"Reply with the single word OK"}]}],"generationConfig":{"maxOutputTokens":64}}' 2>/dev/null || true)"
+  else
+    code="$(printf 'header = "Authorization: Bearer %s"\n' "$key" | curl -sS -K - -o "$out" -w '%{http_code}' -m 45 \
+      "${base}/chat/completions" \
+      -H 'Content-Type: application/json' \
+      -d "{\"model\":\"${model}\",\"max_tokens\":16,\"messages\":[{\"role\":\"user\",\"content\":\"Reply with the single word OK\"}]}" 2>/dev/null || true)"
+  fi
+  code="${code:-000}"
+  detail="$(grep -o '"message"[[:space:]]*:[[:space:]]*"[^"]*"' "$out" | head -1 | cut -c1-200 || true)"
+  rm -f "$out"
+  case "$code" in
+    200) echo "  The key and model work."; return 0 ;;
+    401|403) echo "  The service rejected the key (HTTP $code)." ;;
+    402) echo "  The account has no credit, or this key's spending limit is used up (HTTP 402)." ;;
+    400|404) echo "  The model name was not recognised (HTTP $code)." ;;
+    429) echo "  Rate limited, or no free quota on this key (HTTP 429)." ;;
+    000) echo "  Could not reach the service. Check the server's internet connection." ;;
+    *) echo "  The service answered HTTP $code." ;;
+  esac
+  if [ -n "$detail" ]; then echo "  Details: $detail"; fi
+  return 1
+}
+
+echo
+echo "Testing the key and model..."
+if ! test_llm "$provider" "$api_key" "$model" "$base_url"; then
+  read -r -p "The test failed. Save these settings anyway? [y/N] " save_anyway
+  case "${save_anyway:-N}" in
+    [yY]*) ;;
+    *) echo "Nothing was changed."; exit 1 ;;
+  esac
+fi
+
+setvar ENGAGE_LLM_PROVIDER "$provider"
+setvar ENGAGE_LLM_API_KEY "$api_key"
+setvar ENGAGE_LLM_MODEL "$model"
+if [ -n "$base_url" ]; then setvar ENGAGE_LLM_BASE_URL "$base_url"; fi
 
 ask "Email address that should receive alerts and the daily summary." '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' 0
 setvar ENGAGE_ALERT_EMAIL "$ANSWER"

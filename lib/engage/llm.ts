@@ -105,6 +105,10 @@ export async function generateJson(
       temperature: 0.8,
       max_tokens: MAX_OUTPUT_TOKENS,
       response_format: { type: "json_object" },
+      // OpenRouter only: skip providers that retain or train on prompts.
+      ...(config.llm.denyDataCollection && baseUrl.includes("openrouter.ai")
+        ? { provider: { data_collection: "deny" } }
+        : {}),
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },

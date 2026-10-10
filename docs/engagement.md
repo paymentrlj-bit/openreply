@@ -54,14 +54,14 @@ A keyword campaign always wins: if a campaign handles a comment or message, smar
    sudo bash setup-worker.sh
    ```
 
-3. **Get an AI key.** Free option: sign in at aistudio.google.com, choose *Get API key*, create one. Free-tier use means Google may use what you send to improve its products, and people may review it. Only the comment or message text is sent, never names, ids or your Instagram token. Adding billing to the key turns that off.
+3. **Get an AI key.** Recommended: [OpenRouter](https://openrouter.ai) with a little credit. Free tiers (for example Google AI Studio's) can be unreliable, and Google may use what you send on the free tier to improve its products. On OpenRouter, create a **new key just for this** (Keys, Create key) and give it a monthly spending limit, so it cannot use up credit another app needs and a leaked key can only cost that much. Pick the model on openrouter.ai/models and copy its exact name, for example `anthropic/claude-haiku-4.5` or `google/gemini-2.5-flash`. Only the comment or message text is sent, never names, ids or your Instagram token, and requests ask OpenRouter to use only providers that do not keep or train on prompts.
 4. **Run the setup script** and answer its questions:
 
    ```
    sudo bash /opt/openreply/deploy/oracle/setup-engagement.sh
    ```
 
-   Choose **dry-run** when asked for the mode. Alerts and the summary use the same mail settings as sign-in emails.
+   Choose **openai** as the service (that is the setting for OpenRouter), paste the key and model name, and choose **dry-run** for the mode. The script sends one tiny test request, so a wrong key, a used-up limit or a misspelt model name shows up straight away. Alerts and the summary use the same mail settings as sign-in emails.
 5. **Turn off Instagram's own instant reply** (Meta Business Suite, Inbox, Automations). Otherwise people get two automatic messages.
 6. **Watch for two or three days.** Each evening at 9 pm India time you get an email listing what it would have sent. Read the replies, especially the Marathi ones.
 7. **Go live:** `sudo bash /opt/openreply/deploy/oracle/setup-engagement.sh mode live`
@@ -79,6 +79,7 @@ These live in `/etc/openreply-worker.env` on the worker. The setup script writes
 | `ENGAGE_LLM_API_KEY` | | The service's key |
 | `ENGAGE_LLM_MODEL` | `gemini-flash-latest` | Model name (required for `openai`) |
 | `ENGAGE_LLM_BASE_URL` | `https://openrouter.ai/api/v1` | Only for `openai` |
+| `ENGAGE_LLM_DENY_DATA_COLLECTION` | `true` | On OpenRouter, only use providers that do not keep or train on prompts |
 | `ENGAGE_ALERT_EMAIL` | | Where alerts and the daily summary go |
 | `EMAIL_SERVER`, `EMAIL_FROM` | | Mail settings, the same as in Vercel |
 | `ENGAGE_MAX_PER_HOUR` / `ENGAGE_MAX_PER_DAY` | `20` / `120` | Reply limits |
@@ -94,7 +95,7 @@ The wording of the fixed replies is in `lib/engage/templates.ts`, and the model'
 
 ## Privacy
 
-Smart replies send comment and message text to the AI service you choose. That service becomes a data processor: name it on your privacy page and in the Meta app's data-handling answers. To remove one person's data on request, delete their rows from `EngagementLog` as well as from the campaign logs.
+Smart replies send comment and message text to the AI service you choose. Check that service's own data settings too (on OpenRouter: Settings, Privacy). That service becomes a data processor: name it on your privacy page and in the Meta app's data-handling answers. To remove one person's data on request, delete their rows from `EngagementLog` as well as from the campaign logs.
 
 ## Checking what happened
 
