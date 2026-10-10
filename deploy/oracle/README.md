@@ -56,6 +56,21 @@ few minutes on a small server.
 Open `https://YOUR-SITE/api/health`. When the worker is running you should see
 `"worker":{"healthy":true,...}`. Allow about a minute after the script finishes.
 
+## Get an alert if it stops (Healthchecks.io, free)
+
+1. On healthchecks.io, create a check. Set **Period** to 5 minutes and **Grace Time** to 10 minutes, and add your email as the alert channel. Copy its ping URL.
+2. On the server, update the code and run the installer:
+
+```
+sudo -u openreply -H git -C /opt/openreply fetch --depth 1 origin main
+sudo -u openreply -H git -C /opt/openreply reset --hard FETCH_HEAD
+sudo bash /opt/openreply/deploy/oracle/setup-healthcheck.sh
+```
+
+3. Paste the ping URL when asked (it stays hidden). It sends a test ping straight away.
+
+Every 5 minutes the server asks your site whether the worker is healthy. If yes, it pings Healthchecks.io. If not, it sends a failure ping. If the server itself is down, the pings simply stop, and you are alerted after the grace time. Never commit the ping URL to this repo.
+
 ## Everyday commands (run on the server)
 
 | What | Command |
