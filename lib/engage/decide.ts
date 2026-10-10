@@ -33,6 +33,11 @@ function safeOrTemplate(
 ): { text: string; usedFallback: boolean } {
   const checked = checkReply(modelReply, { language, maxLength });
   if (checked.ok) return { text: checked.text, usedFallback: false };
+  // Not sure the Marathi is right (for example Hindi crept in): a plain English
+  // reply is better than a wrong Marathi one.
+  if (language === "mr" || language === "mr_latn") {
+    return { text: pickTemplate(kind, "en", seed), usedFallback: true };
+  }
   return { text: pickTemplate(kind, language, seed), usedFallback: true };
 }
 

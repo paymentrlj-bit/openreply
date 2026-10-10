@@ -38,7 +38,7 @@ A keyword campaign always wins: if a campaign handles a comment or message, smar
 
 - **Test mode first.** In `dry-run` it decides and records everything but sends nothing.
 - Each live reply is held back by a random 45 seconds to 10 minutes.
-- At most 20 replies an hour and 120 a day by default.
+- At most 60 replies an hour and 500 a day by default.
 - A model that is unsure (below 70 percent confident) does nothing, or sends the item to you.
 - Customer text is wrapped so it cannot give the model instructions.
 - If a send fails in a way that might still have gone out, it is never retried.
@@ -78,11 +78,12 @@ These live in `/etc/openreply-worker.env` on the worker. The setup script writes
 | `ENGAGE_LLM_PROVIDER` | `gemini` | `gemini`, or `openai` for OpenRouter and compatible services |
 | `ENGAGE_LLM_API_KEY` | | The service's key |
 | `ENGAGE_LLM_MODEL` | `gemini-flash-latest` | Model name (required for `openai`) |
+| `ENGAGE_LLM_FALLBACK_MODEL` | | Optional. Tried once if the main model is rate limited or down. A `:free` model sends text to providers that may keep it |
 | `ENGAGE_LLM_BASE_URL` | `https://openrouter.ai/api/v1` | Only for `openai` |
 | `ENGAGE_LLM_DENY_DATA_COLLECTION` | `true` | On OpenRouter, only use providers that do not keep or train on prompts |
 | `ENGAGE_ALERT_EMAIL` | | Where alerts and the daily summary go |
 | `EMAIL_SERVER`, `EMAIL_FROM` | | Mail settings, the same as in Vercel |
-| `ENGAGE_MAX_PER_HOUR` / `ENGAGE_MAX_PER_DAY` | `20` / `120` | Reply limits |
+| `ENGAGE_MAX_PER_HOUR` / `ENGAGE_MAX_PER_DAY` | `60` / `500` | Reply limits |
 | `ENGAGE_MIN_DELAY_SECONDS` / `ENGAGE_MAX_DELAY_SECONDS` | `45` / `600` | Random delay range |
 | `ENGAGE_MAX_AGE_HOURS` | `24` | Ignore anything older |
 | `ENGAGE_MIN_CONFIDENCE` | `0.7` | Below this the engine does nothing |

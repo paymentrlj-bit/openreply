@@ -19,6 +19,21 @@ function dm(
   return { category, language: "en", confidence: 0.95, reply: "", ...overrides };
 }
 
+describe("Marathi that fails the checks", () => {
+  it("is answered with a plain English reply instead of nothing", () => {
+    const result = decideComment(
+      comment("praise", { language: "mr", reply: "आपका बहुत धन्यवाद" }),
+      config,
+      "seed"
+    );
+    expect(result.kind).toBe("public_reply");
+    if (result.kind === "public_reply") {
+      expect(result.usedFallback).toBe(true);
+      expect(/[ऀ-ॿ]/.test(result.text)).toBe(false);
+    }
+  });
+});
+
 describe("classifyComment", () => {
   it("answers emoji-only comments without calling the model", async () => {
     const generate = vi.fn();
@@ -92,7 +107,7 @@ describe("decideComment", () => {
   });
 
   it("uses a template when the reply is in the wrong script", () => {
-    const d = decideComment(comment("praise", { language: "mr", reply: "Thank you" }), config, "id1");
+    const d = decideComment(comment("praise", { language: "hi", reply: "Thank you" }), config, "id1");
     expect(d.kind).toBe("public_reply");
     expect(d.kind === "public_reply" && /[ऀ-ॿ]/.test(d.text)).toBe(true);
   });
