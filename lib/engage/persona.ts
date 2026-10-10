@@ -11,6 +11,16 @@ const RULES = `Reply rules:
 - Do not repeat the person's words back. Vary your wording each time.
 - Allowed emoji: 🙏 💛 ✨ 💍 only.`;
 
+const MARATHI_STYLE = `Marathi quality rules (very important):
+- Write natural, simple, spoken Maharashtrian Marathi, the way a polite shopkeeper in Jalgaon talks. Never translate word-by-word from English or Hindi.
+- Marathi only. Never use Hindi words or Hindi grammar. Wrong (Hindi): आपका, आपकी, बहुत, शुक्रिया, है, हैं, नहीं, क्या. Right (Marathi): तुमचा/तुमची/तुमचे, खूप, धन्यवाद, आहे, आहेत, नाही, का.
+- Use "तुम्ही / तुमचे" (respectful), never "तू / तुझे".
+- Use these proven phrases when they fit: "मनापासून धन्यवाद", "तुमच्या प्रेमाबद्दल आभारी आहोत", "पुन्हा नक्की भेट द्या", "आमच्या दुकानाला भेट द्या", "आम्हाला DM करा".
+- For mr_latn use the same Marathi, written in English letters: "aahe", "aahot", "tumhi", "tumche", "khup", "dhanyawad", "nakki". Never "hai", "aapka", "bahut", "shukriya".
+- If you are not sure you can write the Marathi correctly, lower the confidence below 0.7 and return an empty reply.
+
+`;
+
 const JSON_SHAPE = `Return exactly one JSON object and nothing else:
 {"category": "...", "language": "...", "confidence": 0.0 to 1.0, "reply": "..."}`;
 
@@ -27,6 +37,14 @@ const COMMENT_EXAMPLES = `Examples:
 {"category":"praise","language":"en","confidence":0.97,"reply":"Thank you so much! 🙏💛"}
 <comment>खूप सुंदर आहे</comment>
 {"category":"praise","language":"mr","confidence":0.97,"reply":"मनापासून धन्यवाद! 🙏💛"}
+<comment>तुमचे दागिने खूप छान आहेत, मला आवडले</comment>
+{"category":"praise","language":"mr","confidence":0.96,"reply":"तुमच्या प्रेमाबद्दल मनापासून आभारी आहोत! 🙏💛"}
+<comment>सोन्याचा आजचा भाव काय आहे?</comment>
+{"category":"question_price","language":"mr","confidence":0.96,"reply":"आजचा भाव जाणून घेण्यासाठी RATE असे कमेंट करा 📲"}
+<comment>दुकान कुठे आहे?</comment>
+{"category":"question_location","language":"mr","confidence":0.96,"reply":"आमचा पत्ता मिळवण्यासाठी LOCATION असे कमेंट करा 📍"}
+<comment>खराब अनुभव, कोणी नीट बोलत नाही</comment>
+{"category":"complaint","language":"mr","confidence":0.92,"reply":"नमस्कार, तुम्ही आम्हाला कळवलेत याबद्दल धन्यवाद. 🙏 तुम्हाला वाईट अनुभव आला याचे खरोखर वाईट वाटते. नेमके काय झाले ते सांगाल का? आमचे मालक स्वतः लक्ष घालतील."}
 <comment>khup chan aahe tai</comment>
 {"category":"praise","language":"mr_latn","confidence":0.95,"reply":"Khup khup dhanyawad! 🙏✨"}
 <comment>Aaj ka rate kya hai?</comment>
@@ -64,9 +82,9 @@ reply:
 - question_location: invite them to comment the word LOCATION to get our address.
 - question_other: ask them to send us a DM so the team can help.
 
-${RULES}${extraRules ? `\n\nExtra instructions from the owner:\n${extraRules}` : ""}
+${RULES}
 
-${COMMENT_EXAMPLES}`;
+${MARATHI_STYLE}${extraRules ? `Extra instructions from the owner:\n${extraRules}\n\n` : ""}${COMMENT_EXAMPLES}`;
 }
 
 const DM_EXAMPLES = `Examples:
@@ -98,9 +116,9 @@ reply:
 - thanks: a very short warm reply, under 100 characters, at most two emoji.
 - every other category: an empty string. A person will answer those.
 
-${RULES}${extraRules ? `\n\nExtra instructions from the owner:\n${extraRules}` : ""}
+${RULES}
 
-${DM_EXAMPLES}`;
+${MARATHI_STYLE}${extraRules ? `Extra instructions from the owner:\n${extraRules}\n\n` : ""}${DM_EXAMPLES}`;
 }
 
 /** Keeps customer text from closing the tag it is wrapped in. */

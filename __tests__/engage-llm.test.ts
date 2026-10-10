@@ -65,6 +65,7 @@ describe("readEngageConfig", () => {
 describe("parseJsonLoose", () => {
   it("parses plain, fenced and surrounded JSON", () => {
     expect(parseJsonLoose('{"a":1}')).toEqual({ a: 1 });
+    expect(parseJsonLoose('<think>hmm {"x":0}</think>{"a":1}')).toEqual({ a: 1 });
     expect(parseJsonLoose('```json\n{"a":1}\n```')).toEqual({ a: 1 });
     expect(parseJsonLoose('Sure! {"a":1} Hope that helps')).toEqual({ a: 1 });
   });
@@ -127,6 +128,11 @@ describe("generateJson", () => {
     };
 
     expect((await bodyFor(make())).provider).toEqual({ data_collection: "deny" });
+    // Asks OpenRouter models to answer without a long "thinking" phase.
+    expect((await bodyFor(make())).reasoning).toEqual({ enabled: false });
+    expect(
+      (await bodyFor(make({ ENGAGE_LLM_BASE_URL: "https://api.example.test/v1" }))).reasoning
+    ).toBeUndefined();
     // Can be switched off, and is never sent to other services.
     expect((await bodyFor(make({ ENGAGE_LLM_DENY_DATA_COLLECTION: "false" }))).provider).toBeUndefined();
     expect(
