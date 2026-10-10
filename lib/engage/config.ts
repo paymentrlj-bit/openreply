@@ -34,6 +34,8 @@ export interface EngageConfig {
   complaintDm: boolean;
   // Thank people who send an emoji or a short thanks in DMs.
   dmReactions: boolean;
+  // Answer common comments from fixed rules without calling the AI model.
+  faq: boolean;
   alertEmail: string | null;
   // Local hour (India time) at which the daily digest email goes out.
   digestHourIst: number;
@@ -88,6 +90,7 @@ export function readEngageConfig(
     minConfidence: Math.min(1, Math.max(0, num(env.ENGAGE_MIN_CONFIDENCE, 0.7))),
     complaintDm: bool(env.ENGAGE_COMPLAINT_DM, true),
     dmReactions: bool(env.ENGAGE_DM_REACTIONS, true),
+    faq: bool(env.ENGAGE_FAQ, true),
     alertEmail: (env.ENGAGE_ALERT_EMAIL ?? "").trim() || null,
     digestHourIst: Math.min(23, Math.max(0, Math.floor(num(env.ENGAGE_DIGEST_HOUR_IST, 21)))),
     extraRules: (env.ENGAGE_EXTRA_RULES ?? "").trim().slice(0, 600),

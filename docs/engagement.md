@@ -34,6 +34,16 @@ A keyword campaign always wins: if a campaign handles a comment or message, smar
 - Reply to a comment inside a thread, or to anything older than 24 hours.
 - Reply to attachment-only messages (a shared post, a photo).
 
+## FAQ: answers without the AI model
+
+Before calling the AI model, the engine checks for the most common comments and answers them directly from fixed rules. This costs no tokens and the wording never varies in a risky way.
+
+- Short comments asking the rate or price are answered with the RATE invitation, and those asking where the shop is with the LOCATION invitation, in the person's language.
+- Short comments that are only praise ("so beautiful", "खूप सुंदर आहे") get a thank-you.
+- Anything that sounds unhappy always goes to the AI model, never to the FAQ.
+- The owner's own answers (timings, exchange of old gold, hallmark and so on) go in `lib/engage/faq-entries.ts`, with keywords and a reply per language. They are used for comments and for direct messages, and are sent exactly as written.
+- Switch the whole FAQ off with `ENGAGE_FAQ=false`.
+
 ## Daily record
 
 Everything the engine handles is saved in the database (the `EngagementLog` table). At 9 pm India time it emails a summary with a spreadsheet attached that lists every comment and message, what the engine did and the reply it sent.

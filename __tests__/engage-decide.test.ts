@@ -49,7 +49,7 @@ describe("classifyComment", () => {
       confidence: 0.9,
       reply: " धन्यवाद! 🙏 ",
     }));
-    expect(await classifyComment(config, "खूप सुंदर", generate)).toEqual({
+    expect(await classifyComment(config, "तुमचे काम आवडले", generate)).toEqual({
       category: "praise",
       language: "mr",
       confidence: 0.9,
