@@ -15,6 +15,16 @@ const MENTION = /@\S/;
 const MONEY_OR_PROMISE =
   /[₹$€%]|\b(?:rs|inr|rupees?|rupaye|discount|offers?|sale|free|guarantee[ds]?|assured|cashback)\b|रुपय|रुपये|सूट|ऑफर|डिस्काउंट|मोफत|मुफ्त|गॅरंटी|गारंटी/iu;
 const DEVANAGARI = /[ऀ-ॿ]/;
+// Hindi words that a model drifts into when asked for Marathi. Marathi does not
+// use them, so seeing one means the reply is Hindi-mixed and must not go out.
+const NOT_LETTER = "(?<![\\p{L}\\p{M}])";
+const NOT_LETTER_AFTER = "(?![\\p{L}\\p{M}])";
+const HINDI_IN_DEVANAGARI = new RegExp(
+  `${NOT_LETTER}(?:है|हैं|हूँ|हूं|आपका|आपकी|आपके|बहुत|शुक्रिया|नहीं|क्या|कीजिए|कीजिये|करें|हमारे|हमें|आपको|धन्यवाद्)${NOT_LETTER_AFTER}`,
+  "u"
+);
+const HINDI_IN_LATIN =
+  /\b(?:hai|hain|aapka|aapki|aapke|aapko|bahut|shukriya|karein|kijiye|hamare|hamein)\b/i;
 const EMOJI = /\p{Extended_Pictographic}/gu;
 
 export type GuardResult =
@@ -53,6 +63,13 @@ export function checkReply(
     hasDevanagari
   ) {
     return { ok: false, reason: "wrong script for the language" };
+  }
+
+  if (options.language === "mr" && HINDI_IN_DEVANAGARI.test(text)) {
+    return { ok: false, reason: "Hindi words in a Marathi reply" };
+  }
+  if (options.language === "mr_latn" && HINDI_IN_LATIN.test(text)) {
+    return { ok: false, reason: "Hindi words in a Marathi reply" };
   }
 
   return { ok: true, text };

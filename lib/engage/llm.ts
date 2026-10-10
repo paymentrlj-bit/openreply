@@ -19,7 +19,8 @@ type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 
 /** Pulls a JSON value out of a model reply, tolerating code fences. */
 export function parseJsonLoose(text: string): unknown {
-  let body = text.trim();
+  // Some models print their reasoning first, wrapped in think tags.
+  let body = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
   const fenced = body.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
   if (fenced) body = fenced[1];
   try {
@@ -81,7 +82,7 @@ export async function generateJson(
         systemInstruction: { parts: [{ text: system }] },
         contents: [{ role: "user", parts: [{ text: user }] }],
         generationConfig: {
-          temperature: 0.8,
+          temperature: 0.5,
           responseMimeType: "application/json",
           maxOutputTokens: MAX_OUTPUT_TOKENS,
         },
@@ -102,9 +103,11 @@ export async function generateJson(
     { Authorization: `Bearer ${apiKey}` },
     {
       model,
-      temperature: 0.8,
+      temperature: 0.5,
       max_tokens: MAX_OUTPUT_TOKENS,
       response_format: { type: "json_object" },
+      // OpenRouter only: answer straight away instead of "thinking" first.
+      ...(baseUrl.includes("openrouter.ai") ? { reasoning: { enabled: false } } : {}),
       // OpenRouter only: skip providers that retain or train on prompts.
       ...(config.llm.denyDataCollection && baseUrl.includes("openrouter.ai")
         ? { provider: { data_collection: "deny" } }

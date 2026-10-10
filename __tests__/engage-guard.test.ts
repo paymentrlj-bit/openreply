@@ -45,6 +45,23 @@ describe("checkReply", () => {
   });
 });
 
+describe("Marathi checks", () => {
+  it("rejects Hindi words in Devanagari Marathi but accepts real Marathi", () => {
+    expect(checkReply("आपका बहुत धन्यवाद!", opts("mr")).ok).toBe(false);
+    expect(checkReply("तुमचा अनुभव कसा होता? हे आमचे भाग्य आहे", opts("mr")).ok).toBe(true);
+    expect(checkReply("मनापासून धन्यवाद! 🙏💛", opts("mr")).ok).toBe(true);
+  });
+
+  it("rejects Hindi words in Marathi written in English letters", () => {
+    expect(checkReply("Aapka bahut shukriya", opts("mr_latn")).ok).toBe(false);
+    expect(checkReply("Khup khup dhanyawad, tumche swagat aahe", opts("mr_latn")).ok).toBe(true);
+  });
+
+  it("does not apply the Marathi checks to Hindi", () => {
+    expect(checkReply("आपका बहुत धन्यवाद", opts("hi")).ok).toBe(true);
+  });
+});
+
 describe("fixed templates", () => {
   const kinds: TemplateKind[] = [
     "thanks",
