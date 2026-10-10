@@ -71,6 +71,16 @@ sudo bash /opt/openreply/deploy/oracle/setup-healthcheck.sh
 
 Every 5 minutes the server asks your site whether the worker is healthy. If yes, it pings Healthchecks.io. If not, it sends a failure ping. If the server itself is down, the pings simply stop, and you are alerted after the grace time. Never commit the ping URL to this repo.
 
+## Smart replies (optional)
+
+Replies to comments and messages in the person's own language, with an email to you for anything sensitive. See [docs/engagement.md](../../docs/engagement.md) for what it does and how to roll it out. After merging and deploying, update the server with `setup-worker.sh`, then run:
+
+```
+sudo bash /opt/openreply/deploy/oracle/setup-engagement.sh
+```
+
+Start in **dry-run** mode, check the evening email for a few days, then switch it on with `sudo bash /opt/openreply/deploy/oracle/setup-engagement.sh mode live`.
+
 ## Everyday commands (run on the server)
 
 | What | Command |
