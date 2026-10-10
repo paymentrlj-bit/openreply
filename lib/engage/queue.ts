@@ -26,6 +26,9 @@ export interface EngageMessageJob {
   messageId: string;
   messageText: string;
   senderId: string;
+  // Set for a message with no text, only an attachment: a shared post or reel
+  // is thanked, a photo, video or voice message is passed to the owner.
+  attachmentKind?: "share" | "media";
   // Set once the worker has added its random delay.
   scheduled?: boolean;
 }

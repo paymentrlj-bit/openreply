@@ -378,15 +378,18 @@ export async function processMessage(
     return;
   }
   const text = data.messageText.trim();
-  if (!text) {
+  const attachmentKind = data.attachmentKind;
+  if (!text && !attachmentKind) {
     await run.finish("SKIPPED", { reason: "no text" });
     return;
   }
 
-  const rules = await deps.store.dmCampaigns(account.id);
-  if (rules.some((rule) => ruleMatches(rule, text))) {
-    await run.finish("SKIPPED", { reason: "handled by a campaign" });
-    return;
+  if (!attachmentKind) {
+    const rules = await deps.store.dmCampaigns(account.id);
+    if (rules.some((rule) => ruleMatches(rule, text))) {
+      await run.finish("SKIPPED", { reason: "handled by a campaign" });
+      return;
+    }
   }
 
   if (await deps.store.senderAnsweredSince(account.id, data.senderId, new Date(deps.now() - DAY_MS))) {
@@ -395,12 +398,23 @@ export async function processMessage(
   }
 
   let classification: Classification<DmCategory>;
-  try {
-    classification = await deps.classifyDm(text);
-  } catch (error) {
-    if (error instanceof LlmError && error.retryable) throw error;
-    await run.finish("ERROR", { errorMessage: describe(error) });
-    return;
+  if (attachmentKind) {
+    // No text for the model to read: a shared post or reel is treated like an
+    // emoji (a thank-you), anything else goes to the owner.
+    classification = {
+      category: attachmentKind === "share" ? "reaction" : "other",
+      language: "other",
+      confidence: 1,
+      reply: "",
+    };
+  } else {
+    try {
+      classification = await deps.classifyDm(text);
+    } catch (error) {
+      if (error instanceof LlmError && error.retryable) throw error;
+      await run.finish("ERROR", { errorMessage: describe(error) });
+      return;
+    }
   }
   await run.update({
     category: classification.category,

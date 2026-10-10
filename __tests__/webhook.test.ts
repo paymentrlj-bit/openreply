@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   verifyWebhookSignature,
   parseCommentEvents,
+  parseAttachmentMessageEvents,
   parseMessageEvents,
   parseReadEvents,
 } from "../lib/meta/webhook";
@@ -419,6 +420,37 @@ describe("parseMessageEvents", () => {
     ]);
 
     expect(parseMessageEvents(payload)).toHaveLength(0);
+  });
+
+  it("should report attachment-only messages separately, as a share or as media", () => {
+    const events = parseAttachmentMessageEvents(
+      messagingPayload([
+        {
+          sender: { id: "user_1" },
+          recipient: { id: "ig_456" },
+          message: { mid: "m1", attachments: [{ type: "ig_reel" }] },
+        },
+        {
+          sender: { id: "user_2" },
+          recipient: { id: "ig_456" },
+          message: { mid: "m2", attachments: [{ type: "audio" }] },
+        },
+        {
+          sender: { id: "user_3" },
+          recipient: { id: "ig_456" },
+          message: { mid: "m3", text: "hello", attachments: [{ type: "image" }] },
+        },
+        {
+          sender: { id: "ig_456" },
+          recipient: { id: "user_4" },
+          message: { mid: "m4", is_echo: true, attachments: [{ type: "image" }] },
+        },
+      ])
+    );
+    expect(events.map((e) => [e.messageId, e.attachmentKind])).toEqual([
+      ["m1", "share"],
+      ["m2", "media"],
+    ]);
   });
 
   it("should ignore messages the account sent to itself", () => {
