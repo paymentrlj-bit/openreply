@@ -46,11 +46,11 @@ export const CUSTOM_FAQ: FaqEntry[] = [
       "बचत", "योजना", "स्कीम", "हप्ता", "हप्ते", "किस्त",
     ],
     replies: {
-      en: "We have 3 gold savings schemes: Suvarna Vrudhi Yojana (11+1: pay 11 instalments and the 12th is on us), Sona Muft Shulk Plan (100% making discount) and Sona Suraksha Plan (monthly rate booking). Message us on WhatsApp for details: 9850501854 🙏",
-      mr: "आमच्याकडे ३ सोन्याच्या बचत योजना आहेत: सुवर्ण वृद्धी योजना (११+१: ११ हप्ते भरा, १२वा हप्ता आमच्याकडून), सोना मुक्त शुल्क प्लॅन (मेकिंगवर १००% सूट) आणि सोना सुरक्षा प्लॅन (दरमहा रेट बुकिंग). अधिक माहितीसाठी WhatsApp करा: 9850501854 🙏",
-      mr_latn: "Aamchyakade 3 sonyachya bachat yojana aahet: Suvarna Vrudhi Yojana (11+1: 11 hapte bhara, 12va hapta aamchyakadun), Sona Muft Shulk Plan (making var 100% soot) ani Sona Suraksha Plan (dar mahinyala rate booking). Adhik mahitisathi WhatsApp kara: 9850501854 🙏",
-      hi: "हमारे पास 3 गोल्ड सेविंग स्कीम हैं: सुवर्ण वृद्धि योजना (11+1: 11 किस्तें भरें, 12वीं किस्त हमारी तरफ़ से), सोना मुक्त शुल्क प्लान (मेकिंग पर 100% छूट) और सोना सुरक्षा प्लान (हर महीने रेट बुकिंग)। अधिक जानकारी के लिए WhatsApp करें: 9850501854 🙏",
-      hi_latn: "Hamare paas 3 gold savings scheme hain: Suvarna Vrudhi Yojana (11+1: 11 kisht bharein, 12vi kisht hamari taraf se), Sona Muft Shulk Plan (making par 100% chhoot) aur Sona Suraksha Plan (har mahine rate booking). Adhik jaankari ke liye WhatsApp karein: 9850501854 🙏",
+      en: "We have 3 gold savings schemes, from ₹500 up to ₹2,00,000 a month: Suvarna Vrudhi Yojana (11+1: pay 11 instalments and the 12th is on us), Sona Muft Shulk Plan (100% making discount) and Sona Suraksha Plan (monthly rate booking + 25% making discount). Message us on WhatsApp for details: 9850501854 🙏",
+      mr: "आमच्याकडे दरमहा ₹५०० ते ₹२,००,००० पर्यंतच्या ३ सोन्याच्या बचत योजना आहेत: सुवर्ण वृद्धी योजना (११+१: ११ हप्ते भरा, १२वा हप्ता आमच्याकडून), सोना मुक्त शुल्क प्लॅन (मेकिंगवर १००% सूट) आणि सोना सुरक्षा प्लॅन (दरमहा रेट बुकिंग + २५% मेकिंग सूट). अधिक माहितीसाठी WhatsApp करा: 9850501854 🙏",
+      mr_latn: "Aamchyakade daramahaa ₹500 te ₹2,00,000 paryantchya 3 sonyachya bachat yojana aahet: Suvarna Vrudhi Yojana (11+1: 11 hapte bhara, 12va hapta aamchyakadun), Sona Muft Shulk Plan (making var 100% soot) ani Sona Suraksha Plan (daramahaa rate booking + 25% making soot). Adhik mahitisathi WhatsApp kara: 9850501854 🙏",
+      hi: "हमारे पास हर महीने ₹500 से ₹2,00,000 तक की 3 गोल्ड सेविंग स्कीम हैं: सुवर्ण वृद्धि योजना (11+1: 11 किस्तें भरें, 12वीं किस्त हमारी तरफ़ से), सोना मुक्त शुल्क प्लान (मेकिंग पर 100% छूट) और सोना सुरक्षा प्लान (हर महीने रेट बुकिंग + 25% मेकिंग छूट)। अधिक जानकारी के लिए WhatsApp करें: 9850501854 🙏",
+      hi_latn: "Hamare paas har mahine ₹500 se ₹2,00,000 tak ki 3 gold savings scheme hain: Suvarna Vrudhi Yojana (11+1: 11 kisht bharein, 12vi kisht hamari taraf se), Sona Muft Shulk Plan (making par 100% chhoot) aur Sona Suraksha Plan (har mahine rate booking + 25% making chhoot). Adhik jaankari ke liye WhatsApp karein: 9850501854 🙏",
     },
   },
   {
